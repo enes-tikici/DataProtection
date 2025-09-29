@@ -1,4 +1,5 @@
 ﻿using DataProtection.Context;
+using DataProtection.DataProtection;
 using DataProtection.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,11 @@ namespace DataProtection.Controllers
     {
 
         private readonly DataProtectionDbContext _context;
-        public AuthController(DataProtectionDbContext context)
+        private readonly IDataProtection _protector;
+        public AuthController(DataProtectionDbContext context, IDataProtection protector)
         {
             _context = context;
+            _protector = protector;
         }
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserEntity entity)
@@ -36,7 +39,7 @@ namespace DataProtection.Controllers
                 FirstName = entity.FirstName,
                 LastName = entity.LastName,
                 Email = entity.Email,
-                Password = entity.Password 
+                Password = _protector.Protected.(entity.Password),
             };
 
             await _context.Users.AddAsync(user);
